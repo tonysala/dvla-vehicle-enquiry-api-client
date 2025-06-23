@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\Request;
 
-use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\RegistrationNumber;
 use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\ChassisVin;
-use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\Date;
+use Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\ValueObject\RegistrationNumber;
+use Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\ValueObject\Date;
 use Tizo\Dvla\VehicleEnquiry\Client\PayloadRequest;
 use Tizo\Dvla\VehicleEnquiry\Client\ValueObject\HttpMethod;
 
