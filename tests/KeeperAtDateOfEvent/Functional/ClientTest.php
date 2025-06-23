@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Functional\Tizo\Dvla\KeeperAtDateOfEvent;
 
-use Tizo\Dvla\KeeperAtDateOfEvent\Auth\JwtAuthHttpClientDecorator;
+use Tizo\Dvla\KeeperAtDateOfEvent\Auth\JwtTokenProvider;
+use Tizo\Dvla\KeeperAtDateOfEvent\Auth\RefreshingJwtAuthHttpClientDecorator;
 use Tizo\Dvla\KeeperAtDateOfEvent\Auth\ValueObject\JwtToken;
 use Tizo\Dvla\KeeperAtDateOfEvent\Client;
 use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\Request\VehicleKeeperRequest;
@@ -34,13 +35,22 @@ final class ClientTest extends TestCase
 
         $this->httpClient = $this->createMock(ClientInterface::class);
 
+        $psr18 = new Psr18ClientDecorator(
+            $this->httpClient
+        );
+
+        $tokenProvider = new JwtTokenProvider(
+            $psr18,
+            new Uri(self::BASE_URL),
+            'user',
+            'pass'
+        );
+
         $this->fixture = new Client(
             new ApiKeyAuthHttpClientDecorator(
-                new JwtAuthHttpClientDecorator(
-                    new Psr18ClientDecorator(
-                        $this->httpClient
-                    ),
-                    JwtToken::fromString('jwt')
+                new RefreshingJwtAuthHttpClientDecorator(
+                    $psr18,
+                    $tokenProvider
                 ),
                 ApiKey::fromString('apikey')
             ),
@@ -58,10 +68,19 @@ final class ClientTest extends TestCase
             'REF123'
         );
 
-        $this->httpClient->expects($this->once())
+        $call = 0;
+        $this->httpClient->expects($this->exactly(2))
             ->method('sendRequest')
             ->willReturnCallback(
-                function (Psr7Request $req): Psr7Response {
+                function (Psr7Request $req) use (&$call): Psr7Response {
+                    $call++;
+
+                    if ($call === 1) {
+                        $this->assertSame(self::BASE_URL . '/thirdparty-access/v1/authenticate', $req->getUri()->__toString());
+
+                        return new Psr7Response(200, [], '{"token":"jwt","expires_in":0}');
+                    }
+
                     $this->assertSame(self::BASE_URL . '/vehicle-keeper', $req->getUri()->__toString());
                     $this->assertSame('POST', $req->getMethod());
                     $req->getBody()->rewind();
@@ -83,5 +102,54 @@ final class ClientTest extends TestCase
         $this->assertSame('AA19AAA', $response->registrationNumber()?->toString());
         $this->assertSame('Honda', $response->make());
         $this->assertSame('CR-V', $response->model());
+    }
+
+    public function test_it_refreshes_the_token_when_it_expires(): void
+    {
+        $request = VehicleKeeperRequest::forRegistrationNumber(
+            RegistrationNumber::fromString('AA19AAA'),
+            'ENQ1',
+            '00EV',
+            Date::fromString('2023-04-01'),
+            'REF123'
+        );
+
+        $call = 0;
+        $this->httpClient->expects($this->exactly(4))
+            ->method('sendRequest')
+            ->willReturnCallback(
+                function (Psr7Request $req) use (&$call): Psr7Response {
+                    $call++;
+
+                    if ($call === 1) {
+                        return new Psr7Response(200, [], '{"token":"first","expires_in":0}');
+                    }
+
+                    if ($call === 2) {
+                        $this->assertSame('Bearer first', $req->getHeaderLine('Authorization'));
+
+                        return new Psr7Response(
+                            200,
+                            [],
+                            '{"registrationNumber":"AA19AAA","make":"Honda","model":"CR-V","taxStatus":"Untaxed","keeper":{"title":"MR","firstNames":"JOE","lastName":"BLOGGS","address":{"line1":"1 TEST","postcode":"TT1 1TT"}}}'
+                        );
+                    }
+
+                    if ($call === 3) {
+                        return new Psr7Response(200, [], '{"token":"second","expires_in":60}');
+                    }
+
+                    $this->assertSame('Bearer second', $req->getHeaderLine('Authorization'));
+
+                    return new Psr7Response(
+                        200,
+                        [],
+                        '{"registrationNumber":"AA19AAA","make":"Honda","model":"CR-V","taxStatus":"Untaxed","keeper":{"title":"MR","firstNames":"JOE","lastName":"BLOGGS","address":{"line1":"1 TEST","postcode":"TT1 1TT"}}}'
+                    );
+                }
+            );
+
+        $this->fixture->vehicleKeeper()->get($request);
+        $this->fixture->vehicleKeeper()->get($request);
     }
 }
