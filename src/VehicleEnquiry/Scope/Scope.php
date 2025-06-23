@@ -8,6 +8,7 @@ use Tizo\Dvla\VehicleEnquiry\Client\HttpClient;
 use Tizo\Dvla\VehicleEnquiry\Client\PayloadRequest;
 use Tizo\Dvla\VehicleEnquiry\Client\Request;
 use Tizo\Dvla\VehicleEnquiry\Client\Response;
+use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\UriInterface;
 
 abstract class Scope
@@ -28,12 +29,26 @@ abstract class Scope
         );
     }
 
+    protected function sendAsync(Request $request): PromiseInterface
+    {
+        return $this->client()->requestAsync(
+            $this->baseUri(),
+            $request->method(),
+            $this->payload($request)
+        );
+    }
+
     /**
      * @return array<mixed>
      */
     protected function sendAndDecode(Request $request): array
     {
         return $this->send($request)->content()->decode();
+    }
+
+    protected function sendAndDecodeAsync(Request $request): PromiseInterface
+    {
+        return $this->sendAsync($request)->then(static fn(Response $response) => $response->content()->decode());
     }
 
     /**

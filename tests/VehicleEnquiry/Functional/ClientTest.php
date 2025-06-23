@@ -134,6 +134,22 @@ final class ClientTest extends TestCase
         $this->assertNull($response->getEuroStatus());
     }
 
+    #[Test]
+    public function it_should_request_vehicle_details_async_and_decode_response(): void
+    {
+        $registrationNumber = 'BV65CXG';
+        $request = EnquiryRequest::with(RegistrationNumber::fromString($registrationNumber));
+
+        $this->httpClient->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn(new Psr7Response(200, [], '{"registrationNumber":"BV65CXG"}'));
+
+        $promise = $this->fixture->vehicles()->enquireDetailsAsync($request);
+        $response = $promise->wait();
+
+        $this->assertSame($registrationNumber, $response->getRegistrationNumber()->toString());
+    }
+
     /**
      * @psalm-param class-string<\Throwable> $expectedExceptionClass
      */

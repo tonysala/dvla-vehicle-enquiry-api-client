@@ -25,4 +25,9 @@ final class Date
 
         return $date->setTime(0, 0);
     }
+
+    public function toString(): string
+    {
+        return $this->date;
+    }
 }

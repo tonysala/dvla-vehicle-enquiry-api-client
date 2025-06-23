@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Tizo\Dvla\VehicleEnquiry\Auth;
+namespace Tizo\Dvla\KeeperAtDateOfEvent\Auth;
 
-use Tizo\Dvla\VehicleEnquiry\Auth\ValueObject\ApiKey;
+use Tizo\Dvla\KeeperAtDateOfEvent\Auth\ValueObject\JwtToken;
 use Tizo\Dvla\VehicleEnquiry\Client\HttpClient;
 use Tizo\Dvla\VehicleEnquiry\Client\Response;
 use Tizo\Dvla\VehicleEnquiry\Client\ValueObject\HttpMethod;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\UriInterface;
 
-final class ApiKeyAuthHttpClientDecorator implements HttpClient
+final class JwtAuthHttpClientDecorator implements HttpClient
 {
-    public function __construct(private readonly HttpClient $innerClient, private readonly ApiKey $apiKey)
+    public function __construct(private readonly HttpClient $innerClient, private readonly JwtToken $token)
     {
     }
 
@@ -28,7 +28,7 @@ final class ApiKeyAuthHttpClientDecorator implements HttpClient
             $method,
             $data,
             [
-                'x-api-key' => $this->apiKey->toString(),
+                'Authorization' => 'Bearer ' . $this->token->toString(),
                 ...$headers,
             ]
         );
@@ -45,7 +45,7 @@ final class ApiKeyAuthHttpClientDecorator implements HttpClient
             $method,
             $data,
             [
-                'x-api-key' => $this->apiKey->toString(),
+                'Authorization' => 'Bearer ' . $this->token->toString(),
                 ...$headers,
             ]
         );
