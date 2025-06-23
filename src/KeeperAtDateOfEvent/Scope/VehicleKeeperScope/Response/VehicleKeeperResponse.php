@@ -8,6 +8,7 @@ use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\Address;
 use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\Keeper;
 use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\ChassisVin;
 use Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\ValueObject\RegistrationNumber;
+use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\RegistrationNumber;
 use Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\ValueObject\TaxStatus;
 use Assert\Assert;
 

@@ -38,7 +38,7 @@ final class JwtAuthHttpClientDecorator implements HttpClient
      * @param array<string|int, mixed>|null $data
      * @param array<string, string|array<string>> $headers
      */
-    public function requestAsync(UriInterface $uri, HttpMethod $method, ?array $data = null, array $headers = []): \GuzzleHttp\Promise\PromiseInterface
+    public function requestAsync(UriInterface $uri, HttpMethod $method, ?array $data = null, array $headers = []): PromiseInterface
     {
         return $this->innerClient->requestAsync(
             $uri,
