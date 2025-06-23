@@ -83,3 +83,53 @@ which contains all the returned API response data in value objects.
 
 This example is using the UAT API URL and a test registration number. [Test registration numbers](https://developer-portal.driver-vehicle-licensing.api.gov.uk/apis/vehicle-enquiry-service/mock-responses.html#test-vrns)
 for mock responses of the different test cases are available in the [DVLA Vehicle Enquiry Service API documentation](https://developer-portal.driver-vehicle-licensing.api.gov.uk/apis/vehicle-enquiry-service/vehicle-enquiry-service-description.html#vehicle-enquiry-service-api).
+
+### Keeper at Date of Event example
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Tizo\Dvla\VehicleEnquiry\Auth\ApiKeyAuthHttpClientDecorator;
+use Tizo\Dvla\VehicleEnquiry\Auth\ValueObject\ApiKey;
+use Tizo\Dvla\VehicleEnquiry\Psr18ClientDecorator;
+use Tizo\Dvla\KeeperAtDateOfEvent\Auth\JwtTokenProvider;
+use Tizo\Dvla\KeeperAtDateOfEvent\Auth\RefreshingJwtAuthHttpClientDecorator;
+use Tizo\Dvla\KeeperAtDateOfEvent\Client as KadoeClient;
+use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\Request\VehicleKeeperRequest;
+use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\Date;
+use Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject\RegistrationNumber;
+use Nyholm\Psr7\Uri;
+
+$httpClient = new YourPsr18HttpClient();
+$psr18 = new Psr18ClientDecorator($httpClient);
+
+$tokenProvider = new JwtTokenProvider(
+    $psr18,
+    new Uri('https://uat.driver-vehicle-licensing.api.gov.uk/kadoe/v1'),
+    'YOUR-USERNAME',
+    'YOUR-PASSWORD'
+);
+
+$client = new KadoeClient(
+    new ApiKeyAuthHttpClientDecorator(
+        new RefreshingJwtAuthHttpClientDecorator(
+            $psr18,
+            $tokenProvider
+        ),
+        ApiKey::fromString('YOUR-API-KEY')
+    ),
+    new Uri('https://uat.driver-vehicle-licensing.api.gov.uk/kadoe/v1')
+);
+
+$keeperDetails = $client->vehicleKeeper()->get(
+    VehicleKeeperRequest::forRegistrationNumber(
+        RegistrationNumber::fromString('AA19AAA'),
+        'ENQ1',
+        '00EV',
+        Date::fromString('2023-04-01'),
+        'REF123'
+    )
+);
+```
