@@ -60,13 +60,7 @@ we are using GuzzleClient with a [decorator](https://github.com/tonysala/dvla-ve
 
 declare(strict_types=1);
 
-use App\Services\Dvla\VehicleEnquiry\Auth\ApiKeyAuthHttpClientDecorator;
-use App\Services\Dvla\VehicleEnquiry\Auth\ValueObject\ApiKey;
-use App\Services\Dvla\VehicleEnquiry\Client;
-use App\Services\Dvla\VehicleEnquiry\Psr18ClientDecorator;
-use App\Services\Dvla\VehicleEnquiry\Scope\VehiclesScope\Request\EnquiryRequest;
-use App\Services\Dvla\VehicleEnquiry\Scope\VehiclesScope\ValueObject\RegistrationNumber;
-use Nyholm\Psr7\Uri;
+use Tizo\Dvla\VehicleEnquiry\Auth\ApiKeyAuthHttpClientDecorator;use Tizo\Dvla\VehicleEnquiry\Auth\ValueObject\ApiKey;use Tizo\Dvla\VehicleEnquiry\Client;use Tizo\Dvla\VehicleEnquiry\Psr18ClientDecorator;use Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\Request\EnquiryRequest;use Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\ValueObject\RegistrationNumber;use Nyholm\Psr7\Uri;
 
 $client = new Client(
         new ApiKeyAuthHttpClientDecorator(
