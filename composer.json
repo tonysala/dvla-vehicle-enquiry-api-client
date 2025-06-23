@@ -1,0 +1,108 @@
+{
+    "name": "lendable/dvla-vehicle-enquiry-api-client",
+    "description": "API client for the DVLA's Vehicle Enquiry Service API",
+    "keywords": ["DVLA", "DVLA Vehicle Enquiry Service"],
+    "homepage": "https://www.lendable.co.uk",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\Services\\Dvla\\VehicleEnquiry\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Unit\\App\\Services\\Dvla\\VehicleEnquiry\\": "tests/Unit/",
+            "Tests\\Functional\\App\\Services\\Dvla\\VehicleEnquiry\\": "tests/Functional/",
+            "Tests\\Integration\\App\\Services\\Dvla\\VehicleEnquiry\\": "tests/Integration/"
+        }
+    },
+    "require": {
+        "php": ">=8.1,<9",
+        "ext-json": "*",
+        "beberlei/assert": "^3.2",
+        "nyholm/psr7": "^1.2",
+        "paragonie/hidden-string": "^2.0",
+        "paragonie/random_compat": "^9.99.100",
+        "psr/http-client": "^1.0.1",
+        "psr/http-message": "^1.0"
+    },
+    "require-dev": {
+        "guzzlehttp/guzzle": "^6.5.8|^7.4.5",
+        "php-cs-fixer/shim": "^3.61.1",
+        "php-parallel-lint/php-parallel-lint": "^1.4.0",
+        "phpstan/phpstan": "^1.11.9",
+        "phpstan/phpstan-beberlei-assert": "^1.1.2",
+        "phpstan/phpstan-deprecation-rules": "^1.2.0",
+        "phpstan/phpstan-phpunit": "^1.4.0",
+        "phpstan/phpstan-strict-rules": "^1.6.0",
+        "phpunit/phpunit": "^10.5.29",
+        "rector/rector": "^1.2.2"
+    },
+
+    "scripts": {
+        "code-style:check": [
+            "bin/php-cs-fixer fix --config='./tools/php-cs-fixer/config.php' --show-progress=none --dry-run --no-interaction --diff -v --using-cache=no"
+        ],
+        "code-style:fix": [
+            "bin/php-cs-fixer fix --config='./tools/php-cs-fixer/config.php' --show-progress=none --no-interaction --diff -v"
+        ],
+        "security:check": [
+            "@composer audit"
+        ],
+        "static-analysis": [
+            "bin/phpstan analyse src/ tests/ rector.php --configuration=./tools/phpstan/phpstan.neon --ansi",
+            "@rector:check"
+        ],
+        "lint:source": [
+            "parallel-lint src"
+        ],
+        "lint:tests": [
+            "parallel-lint tests"
+        ],
+        "lint:all": [
+            "@lint:source",
+            "@lint:tests"
+        ],
+        "test:all": [
+            "@test:unit",
+            "@test:functional",
+            "@test:integration"
+        ],
+        "test:unit": [
+            "bin/phpunit --colors --do-not-cache-result --testsuite=unit"
+        ],
+        "test:functional": [
+            "bin/phpunit --colors --do-not-cache-result --testsuite=functional"
+        ],
+        "test:integration": [
+            "bin/phpunit --colors --do-not-cache-result --testsuite=integration"
+        ],
+        "rector:check": [
+            "rector --dry-run --ansi --no-progress-bar"
+        ],
+        "rector:fix": [
+            "rector --ansi --no-progress-bar"
+        ],
+        "ci": [
+            "@lint:all",
+            "@code-style:check",
+            "@security:check",
+            "@static-analysis",
+            "@rector:check",
+            "@test:all"
+        ],
+        "run-ci": [
+            "ci/run.sh"
+        ]
+    },
+
+    "config": {
+        "bin-dir": "bin",
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.16"
+        }
+    },
+    "prefer-stable": true
+}
