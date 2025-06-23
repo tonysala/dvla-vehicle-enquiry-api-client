@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\ValueObject;
+namespace Tizo\Dvla\KeeperAtDateOfEvent\Scope\VehicleKeeperScope\ValueObject;
 
 use Assert\Assert;
 
