@@ -84,4 +84,30 @@ final class ClientTest extends TestCase
         $this->assertSame('Honda', $response->make());
         $this->assertSame('CR-V', $response->model());
     }
+
+    public function test_it_requests_vehicle_keeper_async_and_decodes_response(): void
+    {
+        $request = VehicleKeeperRequest::forRegistrationNumber(
+            RegistrationNumber::fromString('AA19AAA'),
+            'ENQ1',
+            '00EV',
+            Date::fromString('2023-04-01'),
+            'REF123'
+        );
+
+        $this->httpClient->expects($this->once())
+            ->method('sendRequest')
+            ->willReturn(new Psr7Response(
+                200,
+                [],
+                '{"registrationNumber":"AA19AAA","make":"Honda","model":"CR-V","taxStatus":"Untaxed","keeper":{"title":"MR"}}'
+            ));
+
+        $promise = $this->fixture->vehicleKeeper()->getAsync($request);
+        $response = $promise->wait();
+
+        $this->assertSame('AA19AAA', $response->registrationNumber()?->toString());
+        $this->assertSame('Honda', $response->make());
+        $this->assertSame('CR-V', $response->model());
+    }
 }

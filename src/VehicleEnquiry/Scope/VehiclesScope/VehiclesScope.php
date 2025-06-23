@@ -7,6 +7,7 @@ namespace Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope;
 use Tizo\Dvla\VehicleEnquiry\Scope\Scope;
 use Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\Request\EnquiryRequest;
 use Tizo\Dvla\VehicleEnquiry\Scope\VehiclesScope\Response\EnquiryResponse;
+use GuzzleHttp\Promise\PromiseInterface;
 
 final class VehiclesScope extends Scope
 {
@@ -20,5 +21,11 @@ final class VehiclesScope extends Scope
         $responseData = $this->sendAndDecode($request);
 
         return EnquiryResponse::fromArray($responseData);
+    }
+
+    public function enquireDetailsAsync(EnquiryRequest $request): PromiseInterface
+    {
+        return $this->sendAndDecodeAsync($request)
+            ->then(static fn(array $data) => EnquiryResponse::fromArray($data));
     }
 }

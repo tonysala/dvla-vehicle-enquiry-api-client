@@ -19,6 +19,8 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriInterface;
+use GuzzleHttp\Promise\Create;
+use GuzzleHttp\Promise\PromiseInterface;
 
 final class Psr18ClientDecorator implements HttpClient
 {
@@ -54,6 +56,11 @@ final class Psr18ClientDecorator implements HttpClient
         } catch (\Throwable $exception) {
             throw RequestFailed::dueTo($exception);
         }
+    }
+
+    public function requestAsync(UriInterface $uri, HttpMethod $method, ?array $data = null, array $headers = []): PromiseInterface
+    {
+        return Create::promiseFor($this->request($uri, $method, $data, $headers));
     }
 
     private function createPsrRequest(HttpMethod $method, UriInterface $uri, ?array $data, array $headers): RequestInterface
